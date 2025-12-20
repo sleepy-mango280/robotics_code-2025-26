@@ -72,8 +72,7 @@ public class SensorLimelight3A extends LinearOpMode {
     private Limelight3A limelight;
 
     @Override
-    public void runOpMode() throws InterruptedException
-    {
+    public void runOpMode() throws InterruptedException {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
         telemetry.setMsTransmissionInterval(11);
@@ -94,7 +93,7 @@ public class SensorLimelight3A extends LinearOpMode {
             telemetry.addData("Name", "%s",
                     status.getName());
             telemetry.addData("LL", "Temp: %.1fC, CPU: %.1f%%, FPS: %d",
-                    status.getTemp(), status.getCpu(),(int)status.getFps());
+                    status.getTemp(), status.getCpu(), (int) status.getFps());
             telemetry.addData("Pipeline", "Index: %d, Type: %s",
                     status.getPipelineIndex(), status.getPipelineType());
 
@@ -103,15 +102,38 @@ public class SensorLimelight3A extends LinearOpMode {
             // ===== ALIGNMENT & DISTANCE INDICATOR =====
             boolean shoot = false;
 
-// ===== INPUT YOUR VALUES HERE =====
-            double TX_THRESHOLD = input ... ;   // degrees left/right tolerance (e.g., 1.0)
-            double TY_MIN = input ... ;         // min vertical angle for “close enough”
-            double TY_MAX = input ... ;         // max vertical angle for “close enough”
+// ===== INPUT VALUES HERE =====
+            double TX_THRESHOLD = input ...;   // degrees left/right tolerance (e.g., 1.0)
+            double TY_MIN = input ...;         // min vertical angle for “close enough”
+            double TY_MAX = input ...;         // max vertical angle for “close enough”
 
             if (result != null && result.isValid()) {
 
                 double tx = result.getTx();  // horizontal offset
                 double ty = result.getTy();  // vertical offset (proxy for distance)
+
+
+                // ===== DRIVER DIRECTION ASSIST (SINGLE MESSAGE) =====
+
+                String assistMessage;
+
+// Priority: left/right first, then distance
+                if (tx > TX_THRESHOLD) {
+                    assistMessage = "TURN RIGHT";
+                } else if (tx < -TX_THRESHOLD) {
+                    assistMessage = "TURN LEFT";
+                } else if (ty < TY_MIN) {
+                    assistMessage = "MOVE FORWARD";
+                } else if (ty > TY_MAX) {
+                    assistMessage = "MOVE BACK";
+                } else {
+                    assistMessage = "ON TARGET";
+                }
+
+                telemetry.addData("Driver Assist", assistMessage);
+
+
+// ---------- TELEMETRY ----------
 
                 boolean aligned = Math.abs(tx) < TX_THRESHOLD;
                 boolean inRange = (ty > TY_MIN && ty < TY_MAX);
@@ -133,63 +155,6 @@ public class SensorLimelight3A extends LinearOpMode {
                 telemetry.addLine("====== SHOOT ======");
             } else {
                 telemetry.addLine("---- DON'T SHOOT ----");
-            }
-
-            telemetry.update();
-
-
-
-
-
-
-            if (result != null && result.isValid()) {
-                // Access general information
-                Pose3D botpose = result.getBotpose();
-                double captureLatency = result.getCaptureLatency();
-                double targetingLatency = result.getTargetingLatency();
-                double parseLatency = result.getParseLatency();
-                telemetry.addData("LL Latency", captureLatency + targetingLatency);
-                telemetry.addData("Parse Latency", parseLatency);
-                telemetry.addData("PythonOutput", java.util.Arrays.toString(result.getPythonOutput()));
-
-                telemetry.addData("tx", result.getTx());
-                telemetry.addData("txnc", result.getTxNC());
-                telemetry.addData("ty", result.getTy());
-                telemetry.addData("tync", result.getTyNC());
-
-                telemetry.addData("Botpose", botpose.toString());
-
-                // Access barcode results
-                List<LLResultTypes.BarcodeResult> barcodeResults = result.getBarcodeResults();
-                for (LLResultTypes.BarcodeResult br : barcodeResults) {
-                    telemetry.addData("Barcode", "Data: %s", br.getData());
-                }
-
-                // Access classifier results
-                List<LLResultTypes.ClassifierResult> classifierResults = result.getClassifierResults();
-                for (LLResultTypes.ClassifierResult cr : classifierResults) {
-                    telemetry.addData("Classifier", "Class: %s, Confidence: %.2f", cr.getClassName(), cr.getConfidence());
-                }
-
-                // Access detector results
-                List<LLResultTypes.DetectorResult> detectorResults = result.getDetectorResults();
-                for (LLResultTypes.DetectorResult dr : detectorResults) {
-                    telemetry.addData("Detector", "Class: %s, Area: %.2f", dr.getClassName(), dr.getTargetArea());
-                }
-
-                // Access fiducial results
-                List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
-                for (LLResultTypes.FiducialResult fr : fiducialResults) {
-                    telemetry.addData("Fiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
-                }
-
-                // Access color results
-                List<LLResultTypes.ColorResult> colorResults = result.getColorResults();
-                for (LLResultTypes.ColorResult cr : colorResults) {
-                    telemetry.addData("Color", "X: %.2f, Y: %.2f", cr.getTargetXDegrees(), cr.getTargetYDegrees());
-                }
-            } else {
-                telemetry.addData("Limelight", "No data available");
             }
 
             telemetry.update();
