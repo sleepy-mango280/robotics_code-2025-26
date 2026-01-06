@@ -29,7 +29,7 @@ public class SensorLimelight3ADriverAssist extends LinearOpMode {
 
             boolean shoot = false;
 
-            // ===== INPUT VALUES HERE =====
+            //  INPUT VALUES HERE 
             double TX_THRESHOLD = input ...;   // degrees left/right tolerance (e.g., 1.0)
             double TY_MIN = input ...;         // min vertical angle for “close enough”
             double TY_MAX = input ...;         // max vertical angle for “close enough”
@@ -57,7 +57,7 @@ public class SensorLimelight3ADriverAssist extends LinearOpMode {
 
                 telemetry.addData("Driver Assist", assistMessage);
 
-                // ===== SHOOT DECISION =====
+                //  SHOOT DECISION 
                 boolean aligned = Math.abs(tx) < TX_THRESHOLD;
                 boolean inRange = (ty > TY_MIN && ty < TY_MAX);
                 shoot = aligned && inRange;
@@ -72,7 +72,7 @@ public class SensorLimelight3ADriverAssist extends LinearOpMode {
                 telemetry.addData("Driver Assist", "NO TARGET");
             }
 
-            // ===== SHOOT / DON'T SHOOT =====
+            //  SHOOT / DON'T SHOOT 
             if (shoot) {
                 telemetry.addLine("====== SHOOT ======");
             } else {
