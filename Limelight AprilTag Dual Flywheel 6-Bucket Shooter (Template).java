@@ -12,60 +12,54 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 @TeleOp(name = "Limelight AprilTag Dual Flywheel Shooter (6 Buckets)", group = "Template")
 public class LimelightAprilTagDualFlywheelShooter6Buckets extends LinearOpMode {
 
-    // =========================
-    // ======= EDIT ME =========
-    // =========================
+    
+    // ======= EDIT  =========
+    
 
-    // Your configured Limelight NetworkTables table name:
-    // Common: "limelight" OR "limelight-front" etc.
-    private static final String LIMELIGHT_TABLE_NAME = input...; // <-- CHANGE ME (example: "limelight")
+    
+    private static final String LIMELIGHT_TABLE_NAME = limelight; 
 
     // How you get distance from Limelight NetworkTables.
     // Limelight does NOT always publish "distance" by default.
     // Put the correct entry name your robot uses (or one you publish yourself).
-    private static final String DISTANCE_ENTRY_NAME = input...; // <-- CHANGE ME (example: "distance" or "targetDistance")
+    private static final String DISTANCE_ENTRY_NAME = "distance"; 
 
     // Encoder / gearing constants
     // TICKS_PER_REV = encoder ticks per MOTOR revolution (or encoder rev if external encoder).
     // GEAR_RATIO = motor_rev / flywheel_rev  (1.0 if direct drive)
-    private static final double TICKS_PER_REV = input...; // <-- CHANGE ME
-    private static final double GEAR_RATIO    = input...; // <-- CHANGE ME
+    private static final double TICKS_PER_REV = input...; //  CHANGE 
+    private static final double GEAR_RATIO    = input...; //  CHANGE 
 
     // 6 distance buckets => 5 edges (meters)
-    private static final double EDGE_1_M = input...; // <-- CHANGE ME
-    private static final double EDGE_2_M = input...; // <-- CHANGE ME
-    private static final double EDGE_3_M = input...; // <-- CHANGE ME
-    private static final double EDGE_4_M = input...; // <-- CHANGE ME
-    private static final double EDGE_5_M = input...; // <-- CHANGE ME
+    private static final double EDGE_1_M = input...; //  CHANGE 
+    private static final double EDGE_2_M = input...; //  CHANGE 
+    private static final double EDGE_3_M = input...; //  CHANGE 
+    private static final double EDGE_4_M = input...; //  CHANGE 
+    private static final double EDGE_5_M = input...; //  CHANGE 
 
     // RPM targets for each bucket
-    private static final double RPM_BUCKET_0 = input...; // <-- CHANGE ME
-    private static final double RPM_BUCKET_1 = input...; // <-- CHANGE ME
-    private static final double RPM_BUCKET_2 = input...; // <-- CHANGE ME
-    private static final double RPM_BUCKET_3 = input...; // <-- CHANGE ME
-    private static final double RPM_BUCKET_4 = input...; // <-- CHANGE ME
-    private static final double RPM_BUCKET_5 = input...; // <-- CHANGE ME
+    private static final double RPM_BUCKET_0 = input...; //  CHANGE 
+    private static final double RPM_BUCKET_1 = input...; //  CHANGE 
+    private static final double RPM_BUCKET_2 = input...; //  CHANGE 
+    private static final double RPM_BUCKET_3 = input...; //  CHANGE 
+    private static final double RPM_BUCKET_4 = input...; //  CHANGE 
+    private static final double RPM_BUCKET_5 = input...; //  CHANGE 
 
-    // Put ONLY the tags you want to score on (one alliance side).
-    // Example if scoring BLUE side in your drawing: 20, 21, 22, 23
-    // Example if scoring RED  side in your drawing: 24, 21, 22, 23
-    private static final int[] SCORING_TAG_IDS = new int[] {
-            input..., // <-- CHANGE ME (e.g., 20 or 24)
-            input..., // <-- CHANGE ME (e.g., 21)
-            input..., // <-- CHANGE ME (e.g., 22)
-            input..., // <-- CHANGE ME (e.g., 23)
-    };
+    
+    private static final int BLUE_TARGET_TAG_ID = 20; //  blue backdrop tag
+    private static final int RED_TARGET_TAG_ID  = 24; //  red backdrop tag
+
 
     // If true: keep spinning at last RPM when target disappears.
     // If false: stop flywheel when no valid scoring tag.
-    private static final boolean HOLD_LAST_RPM_WHEN_LOST = input...; // <-- CHANGE ME (true/false)
+    private static final boolean HOLD_LAST_RPM_WHEN_LOST = true; // 
 
     // If one motor is mirrored mechanically, set this true to reverse flywheelB direction.
-    private static final boolean REVERSE_FLYWHEEL_B = input...; // <-- CHANGE ME (true/false)
+    private static final boolean REVERSE_FLYWHEEL_B = false; //(true/false)
 
-    // =========================
-    // ===== END EDIT ME =======
-    // =========================
+    
+    // ===== END EDIT =======
+    
 
     private DcMotorEx flywheelA;
     private DcMotorEx flywheelB;
@@ -138,9 +132,8 @@ public class LimelightAprilTagDualFlywheelShooter6Buckets extends LinearOpMode {
         }
     }
 
-    // ---------------------------
     // --------- Logic -----------
-    // ---------------------------
+   
 
     private boolean isScoringTag(int tagId) {
         for (int id : SCORING_TAG_IDS) {
@@ -159,16 +152,14 @@ public class LimelightAprilTagDualFlywheelShooter6Buckets extends LinearOpMode {
         return RPM_BUCKET_5;
     }
 
-    // Convert flywheel RPM -> encoder ticks/sec
+    // Convert flywheel RPM to encoder ticks/sec
     private double rpmToTicksPerSecond(double rpmFlywheel) {
         double flywheelRps = rpmFlywheel / 60.0;
         double motorRps = flywheelRps * GEAR_RATIO; // GEAR_RATIO = motor_rev / flywheel_rev
         return motorRps * TICKS_PER_REV;
     }
 
-    // ---------------------------
     // ---- Limelight Reading ----
-    // ---------------------------
 
     private LimelightTagData readLimelightTagData(NetworkTable table) {
         LimelightTagData out = new LimelightTagData();
