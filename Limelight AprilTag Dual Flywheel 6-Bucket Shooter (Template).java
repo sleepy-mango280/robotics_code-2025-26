@@ -17,7 +17,7 @@ public class LimelightAprilTagDualFlywheelShooter6Buckets extends LinearOpMode {
     
 
     
-    private static final String LIMELIGHT_TABLE_NAME = limelight; 
+    private static final String LIMELIGHT_TABLE_NAME = "limelight"; 
 
     // How you get distance from Limelight NetworkTables.
     // Limelight does NOT always publish "distance" by default.
