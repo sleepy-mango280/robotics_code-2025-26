@@ -19,6 +19,8 @@ public class LimelightAprilTagDualFlywheelShooter6Buckets extends LinearOpMode {
     
     private static final String LIMELIGHT_TABLE_NAME = "limelight"; 
 
+    limelight.getEntry("pipeline").setNumber(0);  // AprilTag pipeline index
+
     // How you get distance from Limelight NetworkTables.
     // Limelight does NOT always publish "distance" by default.
     // Put the correct entry name your robot uses (or one you publish yourself).
@@ -49,6 +51,10 @@ public class LimelightAprilTagDualFlywheelShooter6Buckets extends LinearOpMode {
     private static final int BLUE_TARGET_TAG_ID = 20; //  blue backdrop tag
     private static final int RED_TARGET_TAG_ID  = 24; //  red backdrop tag
 
+    private static final int[] SCORING_TAG_IDS = {
+    BLUE_TARGET_TAG_ID,
+    RED_TARGET_TAG_ID
+    };
 
     // If true: keep spinning at last RPM when target disappears.
     // If false: stop flywheel when no valid scoring tag.
