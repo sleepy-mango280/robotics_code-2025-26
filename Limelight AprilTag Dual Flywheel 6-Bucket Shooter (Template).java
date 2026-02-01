@@ -27,7 +27,7 @@ public class LimelightAprilTagDualFlywheelShooter6Buckets extends LinearOpMode {
     // Encoder / gearing constants
     // TICKS_PER_REV = encoder ticks per MOTOR revolution (or encoder rev if external encoder).
     // GEAR_RATIO = motor_rev / flywheel_rev  (1.0 if direct drive)
-    private static final double TICKS_PER_REV = input...; //  CHANGE 
+    private static final double TICKS_PER_REV = 28; //  CHANGE 
     private static final double GEAR_RATIO    = input...; //  CHANGE 
 
     // 6 distance buckets => 5 edges (meters)
