@@ -1,80 +1,89 @@
-@TeleOp(name = "FieldCentric TeleOp")
-public class FieldCentricDriveTutorial extends OpMode {
+package org.firstinspires.ftc.teamcode;
 
-    // Hardware variables
-    DcMotor backLeft, backRight, frontLeft, frontRight;
-    GoBildaPinpointDriver odo; // Requires the GoBilda repository [1, 2]
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+
+@TeleOp
+
+public class fieldCentricDrive extends OpMode {
+
+    GoBildaPinpointDriver odo;
+    private DcMotor frontLeft;
+    private DcMotor frontRight;
+    private DcMotor backLeft;
+    private DcMotor backRight;
 
     @Override
     public void init() {
-        // Hardware Mapping
         odo = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
-        backLeft = hardwareMap.get(DcMotor.class, "back_left");
-        backRight = hardwareMap.get(DcMotor.class, "back_right");
-        frontLeft = hardwareMap.get(DcMotor.class, "front_left");
-        frontRight = hardwareMap.get(DcMotor.class, "front_right");
+        frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
+        frontRight = hardwareMap.get(DcMotor.class, "frontRight");
+        backLeft = hardwareMap.get(DcMotor.class, "backLeft");
+        backRight = hardwareMap.get(DcMotor.class, "backRight");
 
-        // Optional: reverse motor directions based on your build
-        // frontLeft.setDirection(DcMotor.Direction.REVERSE);
+        backLeft.setDirection(DcMotor.Direction.REVERSE);
+        frontLeft.setDirection(DcMotor.Direction.REVERSE);
 
-        // Pinpoint configuration [2, 3]
-        odo.setOffsets(-84.0, -168.0); // Robot-specific measurements
-        odo.setEncoderResolution(GoBildaPinpointDriver.EncoderResolution.FOUR_BAR_POD);
+        odo.setOffsets(-84.0, -168.0);
+        odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
 
-        // Resetting position and IMU (heading) to ensure fresh data [3]
         odo.resetPosAndIMU();
-
-        // Setting a 2D Pose for the starting position
-        Pose2D startingPos = new Pose2D(DistanceUnit.MM, 0, 0, AngleUnit.RADIANS, 0);
-        // odo.setStartingPosition(startingPos);
+        SparkFunOTOS.Pose2D startingPosition = new SparkFunOTOS.Pose2D(DistanceUnit.MM, -923.925, 1601.47, AngleUnit.RADIANS, 0);
+        odo.setPosition(startingPosition);
 
         telemetry.addData("Status", "Initialized");
-    }
-
-    public void moveRobot() {
-        // 1. Inputs from Gamepad [4]
-        // Vertical is negative on joysticks, so we negate it for 'forward'
-        double forward = -gamepad1.left_stick_y;
-        double strafe = gamepad1.left_stick_x;
-        double rotate = gamepad1.right_stick_x;
-
-        // 2. Grab heading from Pinpoint [4, 5]
-        odo.getPosition();
-        double heading = odo.getHeading(AngleUnit.RADIANS);
-
-        // 3. Condensing Math for the Rotational Matrix [5]
-        // This adjustment aligns the robot's heading with the driver's perspective
-        double cos = Math.cos(Math.PI / 2 - heading);
-        double sin = Math.sin(Math.PI / 2 - heading);
-
-        // Applying the rotational matrix to translate global to local coordinates
-        double globalForward = forward * cos - strafe * sin;
-        double globalStrafe = forward * sin + strafe * cos;
-
-        // 4. Calculating motor powers using Mecanum equations [6]
-        double[] motorPowers = new double[7];
-        motorPowers = globalForward + globalStrafe + rotate; // Front Left
-        motorPowers[8] = globalForward - globalStrafe - rotate; // Front Right
-        motorPowers[9] = globalForward - globalStrafe + rotate; // Back Left
-        motorPowers[10] = globalForward + globalStrafe - rotate; // Back Right
-
-        // 5. Setting Motor Powers [6]
-        frontLeft.setPower(motorPowers);
-        frontRight.setPower(motorPowers[8]);
-        backLeft.setPower(motorPowers[9]);
-        backRight.setPower(motorPowers[10]);
-    }
-
-    @Override
-    public void loop() {
-        // Refresh the odometry data constantly [11]
-        odo.update();
-
-        moveRobot();
-
-        // Debugging Telemetry [11]
-        telemetry.addData("Heading (Deg)", odo.getHeading(AngleUnit.DEGREES));
+        telemetry.addData("X Position (mm)", odo.getXOffset());
+        telemetry.addData("Y Position (mm)", odo.getYOffset());
+        telemetry.addData("Device Version", odo.getDeviceVersion());
+        telemetry.addData("Device Scalar", odo.getYawScalar());
         telemetry.update();
+
+        public void moveRobot() {
+            double forward = -gamepad1.left_stick_y;
+            double strafe = gamepad1.left_stick_x;
+            double rotate = gamepad1.right_stick_x;
+
+            SparkFunOTOS.Pose2D pos = odo.getPosition();
+            double heading = pos.getHeading(AngleUnit.RADIANS);
+
+            double cosAngle = Math.cos(Math.PI/2)-heading;
+            double sinAngle = Math.sin(Math.PI/2)-heading;
+
+            double globalStrafe = -forward * sinAngle + strafe * cosAngle;
+            double globalForward = forward * cosAngle + strafe * sinAngle;
+
+            double [] newWheelSpeeds = new double[4];
+            newWheelSpeeds[0] = globalForward + globalStrafe + rotate;
+            newWheelSpeeds[1] = globalForward - globalStrafe - rotate;
+            newWheelSpeeds[2] = globalForward - globalStrafe + rotate;
+            newWheelSpeeds[3] = globalForward + globalStrafe - rotate;
+
+            frontLeft.setPower(newWheelSpeeds[0]);
+            frontRight.setPower(newWheelSpeeds[1]);
+            backLeft.setPower(newWheelSpeeds[2]);
+            backRight.setPower(newWheelSpeeds[3]);
+            telemetry.addData("XPos", pos.getX(DistanceUnit.MM));
+            telemetry.addData("YPos", pos.getY(DistanceUnit.MM));
+            telemetry.addData("Heading", heading);
+            telemetry.addData("Forward speed", globalForward);
+            telemetry.addData("Strafe speed", globalStrafe);
+            telemetry.update();
+
+        }
+
+        public void loop() {
+            moveRobot();
+
+            Pose2D pos = odo.getPosition();
+            odo.update();
+        }
     }
 }
